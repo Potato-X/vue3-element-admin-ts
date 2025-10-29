@@ -1,26 +1,26 @@
 const getQueryStringByName = function (name: string) {
-  var result = location.search.match(new RegExp('[?&]' + name + '=([^&]+)', 'i'))
+  var result = location.search.match(new RegExp('[?&]' + name + '=([^&]+)', 'i'));
   if (result == null || result.length < 1) {
-    return ''
+    return '';
   }
-  return result[1]
-}
+  return result[1];
+};
 
 const transformData = function (data: any) {
-  const params = new FormData()
+  const params = new FormData();
   for (const item in data) {
-    params.append(item, data[item])
+    params.append(item, data[item]);
   }
-  return params
-}
+  return params;
+};
 
 const DateFormat = function (date: any, fmt: string) {
-  fmt = fmt || 'yyyy-MM-dd hh:mm:ss'
+  fmt = fmt || 'yyyy-MM-dd hh:mm:ss';
   if (date === null || typeof date === 'undefined' || date === '') {
-    return null
+    return null;
   } else {
     // 时间要转成obj，否则报错
-    date = new Date(date)
+    date = new Date(date);
   }
   var o: any = {
     'M+': date.getMonth() + 1, // 月
@@ -30,14 +30,27 @@ const DateFormat = function (date: any, fmt: string) {
     's+': date.getSeconds(), // 秒
     'q+': Math.floor((date.getMonth() + 3) / 3), // 季度
     S: date.getMilliseconds() // 毫秒
-  }
-  if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length))
+  };
+  if (/(y+)/.test(fmt))
+    fmt = fmt.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length));
   for (var k in o) {
     if (new RegExp('(' + k + ')').test(fmt)) {
-      fmt = fmt.replace(RegExp.$1, RegExp.$1.length === 1 ? o[k] : ('00' + o[k]).substr(('' + o[k]).length))
+      fmt = fmt.replace(
+        RegExp.$1,
+        RegExp.$1.length === 1 ? o[k] : ('00' + o[k]).substr(('' + o[k]).length)
+      );
     }
   }
-  return fmt
+  return fmt;
+};
+function mergeObjects<T extends object>(...objs: T[]): T {
+  return objs.reduce((acc, obj) => {
+    Object.entries(obj).forEach(([key, value]) => {
+      if (value) {
+        (acc as any)[key] = value;
+      }
+    });
+    return acc;
+  }, {} as T);
 }
-
-export { getQueryStringByName, transformData, DateFormat }
+export { DateFormat, getQueryStringByName, mergeObjects, transformData };

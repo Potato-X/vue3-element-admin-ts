@@ -1,5 +1,5 @@
-import request from './Axios'
-
+import request from './Axios';
+const baseURL = import.meta.env.VITE_BASE_API;
 /**
  * 登录
  * @param {*} data
@@ -7,10 +7,10 @@ import request from './Axios'
  */
 export function user_login(data: any) {
   return request({
-    url: '/api/login',
+    url: `${baseURL}/Login/Login`,
     method: 'post',
     data
-  })
+  });
 }
 
 /**
@@ -23,7 +23,7 @@ export function user_logout(params: any) {
     url: '/api/logout',
     method: 'get',
     params
-  })
+  });
 }
 
 /**
@@ -36,7 +36,7 @@ export function add_user(data: any) {
     url: '/api/user',
     method: 'post',
     data
-  })
+  });
 }
 
 /**
@@ -48,7 +48,7 @@ export function get_user_info(id: string | undefined) {
   return request({
     url: `/api/user/${id}`,
     method: 'get'
-  })
+  });
 }
 
 /**
@@ -61,7 +61,7 @@ export function update_user_info(data: any) {
     url: `/api/user/${data.id}`,
     method: 'put',
     data
-  })
+  });
 }
 
 /**
@@ -74,7 +74,7 @@ export function delete_user_info(params: any) {
     url: `/api/users`,
     method: 'delete',
     params
-  })
+  });
 }
 
 /**
@@ -87,7 +87,7 @@ export function get_user_list(params?: any) {
     url: '/api/users',
     method: 'get',
     params
-  })
+  });
 }
 
 /**
@@ -100,5 +100,5 @@ export function get_roles(params?: any) {
     url: '/api/roles',
     method: 'get',
     params
-  })
+  });
 }

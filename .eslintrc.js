@@ -340,7 +340,7 @@ module.exports = {
       }
     ],
     // 禁止使用分号结尾
-    semi: [2, 'never'],
+    semi: ['warning', 'always'],
     // 分号后强制使用空格，并在分号前禁止使用空格
     'semi-spacing': [
       2,

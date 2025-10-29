@@ -1,12 +1,12 @@
-import { resolve } from 'path'
-import { UserConfigExport, ConfigEnv } from 'vite'
-import { viteMockServe } from 'vite-plugin-mock'
-import viteCompression from 'vite-plugin-compression'
-import vue from '@vitejs/plugin-vue'
+import vue from '@vitejs/plugin-vue';
+import { resolve } from 'path';
+import { ConfigEnv, UserConfigExport } from 'vite';
+import viteCompression from 'vite-plugin-compression';
+import { viteMockServe } from 'vite-plugin-mock';
 
 // https://vitejs.dev/config/
 export default ({ command }: ConfigEnv): UserConfigExport => {
-  const prodMock = true
+  const prodMock = true;
   return {
     // base: '/',
     base: command === 'serve' ? '/' : '/vue3-element-admin-ts/',
@@ -48,10 +48,9 @@ export default ({ command }: ConfigEnv): UserConfigExport => {
       open: false,
       proxy: {
         '/api': {
-          target: 'https://geo.datav.aliyun.com',
+          target: 'http://123.60.79.164:9090/',
           changeOrigin: true,
-          ws: true,
-          rewrite: (path) => path.replace(new RegExp('^/api'), '')
+          ws: true
         }
       }
     },
@@ -77,5 +76,5 @@ export default ({ command }: ConfigEnv): UserConfigExport => {
         }
       }
     }
-  }
-}
+  };
+};

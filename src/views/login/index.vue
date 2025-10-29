@@ -1,23 +1,18 @@
 <template>
-  <div class="login-wrap">
+  <div class="login-wrap" :style="style">
     <div class="login-content">
       <div class="login-title">系统登录</div>
       <el-form ref="loginFormRef" class="login-form" :model="loginForm" :rules="loginFormRules">
         <el-form-item prop="username">
-          <el-input v-model="loginForm.username" clearable placeholder="用户名" size="large">
+          <el-input v-model="loginForm.username" clearable placeholder="用户名:superadmin" size="large">
             <template #prepend>
               <I name="UserFilled" size="14" />
             </template>
           </el-input>
         </el-form-item>
         <el-form-item prop="password">
-          <el-input
-            v-model="loginForm.password"
-            placeholder="密码"
-            size="large"
-            :type="passwordType"
-            @keyup.enter="submitForm"
-          >
+          <el-input v-model="loginForm.password" placeholder="密码:123456" size="large" :type="passwordType"
+            @keyup.enter="submitForm">
             <template #prepend>
               <I v-if="passwordLock" name="Lock" size="14" @click="switchPass" />
               <I v-else name="Unlock" size="14" @click="switchPass" />
@@ -27,18 +22,32 @@
         <div class="login-btn">
           <el-button type="primary" :loading="btnLoading" @click="submitForm">登录</el-button>
         </div>
-        <p class="login-tips">用户名: admin 密码: 123</p>
-        <p class="login-tips">用户名: editor 密码: 456</p>
       </el-form>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive } from 'vue'
+import { IBaseConfig } from '@/@types/store'
+import { GetFactory } from '@/api/factory'
 import { ElMessage, FormInstance } from 'element-plus'
+import type { CSSProperties, Ref } from 'vue'
+import { computed, inject, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import store from '@/store'
+
+const baseConfig = inject<Ref<IBaseConfig>>("baseconfig")
+
+const style = computed(() => {
+  if (baseConfig?.value && baseConfig.value.loginBgImage) {
+    return {
+      '--login-bg': `url(${baseConfig.value.loginBgImage})`
+    } as CSSProperties
+  } else {
+    return {
+      '--login-bg': 'url("/img/login_bg.jpg")'
+    } as CSSProperties
+  }
+})
 
 const router = useRouter()
 
@@ -67,18 +76,23 @@ const switchPass = () => {
 }
 
 const submitForm = async () => {
+
   loginFormRef.value?.validate((valid) => {
     if (valid) {
-      btnLoading.value = true
-      // 访问登录接口
-      store
-        .dispatch('user/login', loginForm)
-        .then(() => {
-          router.push('/')
-        })
-        .finally(() => {
-          btnLoading.value = false
-        })
+      GetFactory({
+        pageIndex: 1,
+        pageSize: 50
+      })
+      // btnLoading.value = true
+      // // 访问登录接口
+      // store
+      //   .dispatch('user/login', loginForm)
+      //   .then(() => {
+      //     router.push('/')
+      //   })
+      //   .finally(() => {
+      //     btnLoading.value = false
+      //   })
     } else {
       ElMessage.error('请输入用户名和密码')
     }
@@ -92,7 +106,7 @@ const submitForm = async () => {
   width: 100%;
   height: 100%;
   background-color: #235bae;
-  background-image: url('@/assets/img/login_bg.jpg');
+  background-image: var(--login-bg);
   background-size: cover;
 }
 
@@ -108,7 +122,7 @@ const submitForm = async () => {
 .login-content {
   position: absolute;
   top: 50%;
-  left: 50%;
+  right: 5%;
   width: 350px;
   margin: -190px 0 0 -175px;
   overflow: hidden;

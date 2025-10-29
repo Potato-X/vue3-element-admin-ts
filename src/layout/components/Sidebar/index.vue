@@ -1,22 +1,14 @@
 <template>
   <div class="sidebar-container">
     <div class="logo" @click="$router.push('/')">
-      <img class="logo-img" :src="logoUrl" alt="logo" />
+      <img class="logo-img" :src="baseConfig?.productLogo" alt="logo" />
       <transition name="fade-transform" mode="out-in">
-        <h1 v-show="opened" class="logo-text">Vue Element Admin</h1>
+        <h1 v-show="opened" class="logo-text">{{ baseConfig?.systemName }}</h1>
       </transition>
     </div>
     <el-scrollbar class="scrollbar-wrapper">
-      <el-menu
-        :router="true"
-        class="v-enter-to"
-        :default-active="$route.path"
-        :collapse="isCollapse"
-        :show-timeout="200"
-        text-color="#fff"
-        background-color="#4a5a74"
-        active-text-color="#409EFF"
-      >
+      <el-menu :router="true" class="v-enter-to" :default-active="$route.path" :collapse="isCollapse"
+        :show-timeout="200" text-color="#fff" background-color="#4a5a74" active-text-color="#409EFF">
         <SidebarItem v-for="item in routerList" :key="item.path" :index="item.path" :nav="item" />
       </el-menu>
     </el-scrollbar>
@@ -24,13 +16,14 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, computed, onMounted } from 'vue'
-import store from '@/store'
+import { IBaseConfig } from '@/@types/store'
 import { constantRoutes } from '@/router'
+import store from '@/store'
 import { getRoles } from '@/utils/auth'
-import logoUrl from '@/assets/img/logo.png'
+import { computed, inject, onMounted, reactive, Ref } from 'vue'
 import SidebarItem from './SidebarItem.vue'
 
+const baseConfig = inject<Ref<IBaseConfig>>("baseconfig")
 const roles = getRoles()
 const routerList: any[] = reactive([])
 
