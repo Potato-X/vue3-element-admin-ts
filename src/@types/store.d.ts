@@ -19,13 +19,23 @@ declare interface TagsView {
   visitedViews: any[];
   cachedViews: any[];
 }
-
+interface IMenuItem {
+  buttons: string[];
+  children: IMenuItem[];
+  icon: string;
+  menuCode: string;
+  menuName: string;
+  parentId: string;
+  path: string;
+  sort: number;
+}
 declare interface User {
   token: string | undefined;
   roles: string | undefined;
   name: string | undefined;
   avatar: string | undefined;
   introduction: string;
+  menus: IMenuItem[];
 }
 
 declare interface State {

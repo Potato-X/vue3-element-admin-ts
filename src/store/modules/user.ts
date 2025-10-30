@@ -1,8 +1,19 @@
-import { Module } from 'vuex'
-import { ElMessage } from 'element-plus'
-import { User } from '#/store'
-import { user_login, user_logout, get_user_info } from '@/api/user'
-import { getToken, setToken, getRoles, setRoles, getName, setName, getAvatar, setAvatar } from '@/utils/auth'
+import { IMenuItem, User } from '#/store';
+import { get_user_info, user_login, user_logout } from '@/api/user';
+import {
+  getAvatar,
+  getMenus,
+  getName,
+  getRoles,
+  getToken,
+  setAvatar,
+  setMenus,
+  setName,
+  setRoles,
+  setToken
+} from '@/utils/auth';
+import { ElMessage } from 'element-plus';
+import { Module } from 'vuex';
 
 const userModule: Module<User, any> = {
   namespaced: true,
@@ -11,27 +22,32 @@ const userModule: Module<User, any> = {
     roles: getRoles(),
     name: getName(),
     avatar: getAvatar(),
+    menus: getMenus(),
     introduction: ''
   },
   mutations: {
     SET_TOKEN: (state, token: string) => {
-      state.token = token
-      setToken(token)
+      state.token = token;
+      setToken(token);
     },
     SET_ROLES: (state, roles: string) => {
-      state.roles = roles
-      setRoles(roles)
+      state.roles = roles;
+      setRoles(roles);
+    },
+    SET_MENUS: (state, menus: IMenuItem[]) => {
+      state.menus = menus;
+      setMenus(menus);
     },
     SET_NAME: (state, name: string) => {
-      state.name = name
-      setName(name)
+      state.name = name;
+      setName(name);
     },
     SET_AVATAR: (state, avatar: string) => {
-      state.avatar = avatar
-      setAvatar(avatar)
+      state.avatar = avatar;
+      setAvatar(avatar);
     },
     SET_INTRODUCTION: (state, introduction: string) => {
-      state.introduction = introduction
+      state.introduction = introduction;
     }
   },
   actions: {
@@ -40,29 +56,34 @@ const userModule: Module<User, any> = {
       return new Promise((resolve, reject) => {
         user_login(userInfo)
           .then((res: any) => {
-            console.log(11, res)
-            if (res.token) {
-              commit('SET_TOKEN', res.token)
-              commit('SET_ROLES', res.role)
-              commit('SET_NAME', res.username)
-              commit('SET_AVATAR', res.avatar)
-              commit('SET_INTRODUCTION', res.introduction)
+            console.log(11, res);
+            if (res.accessToken) {
+              const userInfo = res.userInfo;
+              const permissions = res.permissions;
+              const roles = permissions.roles;
+              const menus = permissions.menus;
+              commit('SET_TOKEN', res.accessToken);
+              commit('SET_ROLES', roles);
+              commit('SET_MENUS', menus);
+              commit('SET_NAME', userInfo.userName);
+              commit('SET_AVATAR', '');
+              commit('SET_INTRODUCTION', userInfo.userName);
               ElMessage({
                 type: 'success',
                 message: res.message
-              })
+              });
             } else {
               ElMessage({
                 type: 'error',
                 message: res.message
-              })
+              });
             }
-            resolve(res)
+            resolve(res);
           })
           .catch((error) => {
-            reject(error)
-          })
-      })
+            reject(error);
+          });
+      });
     },
 
     // user logout
@@ -70,18 +91,18 @@ const userModule: Module<User, any> = {
       return new Promise((resolve, reject) => {
         user_logout(state.token)
           .then((res) => {
-            commit('SET_TOKEN', '')
-            commit('SET_ROLES', '')
-            commit('SET_NAME', '')
-            commit('SET_AVATAR', '')
-            dispatch('tagsView/delAllViews', null, { root: true })
+            commit('SET_TOKEN', '');
+            commit('SET_ROLES', '');
+            commit('SET_NAME', '');
+            commit('SET_AVATAR', '');
+            dispatch('tagsView/delAllViews', null, { root: true });
 
-            resolve(res)
+            resolve(res);
           })
           .catch((error) => {
-            reject(error)
-          })
-      })
+            reject(error);
+          });
+      });
     },
 
     // get user info
@@ -90,28 +111,28 @@ const userModule: Module<User, any> = {
         get_user_info(state.token)
           .then((res: any) => {
             if (!res) {
-              reject('Verification failed, please Login again.')
+              reject('Verification failed, please Login again.');
             }
 
-            const { roles, name, avatar, introduction } = res
+            const { roles, name, avatar, introduction } = res;
 
             // roles must be a non-empty array
             if (!roles || roles.length <= 0) {
-              reject('getInfo: roles must be a non-null array!')
+              reject('getInfo: roles must be a non-null array!');
             }
 
-            commit('SET_NAME', name)
-            commit('SET_ROLES', roles)
-            commit('SET_AVATAR', avatar)
-            commit('SET_INTRODUCTION', introduction)
-            resolve(res)
+            commit('SET_NAME', name);
+            commit('SET_ROLES', roles);
+            commit('SET_AVATAR', avatar);
+            commit('SET_INTRODUCTION', introduction);
+            resolve(res);
           })
           .catch((error) => {
-            reject(error)
-          })
-      })
+            reject(error);
+          });
+      });
     }
   }
-}
+};
 
-export default userModule
+export default userModule;

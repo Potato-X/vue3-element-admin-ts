@@ -1,5 +1,45 @@
-import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 
+export const dynamicRoutes: Array<RouteRecordRaw> = [
+  {
+    path: '/system/company',
+    name: 'company',
+    component: () => import('@/views/system/company.vue'),
+    meta: { title: '公司管理', icon: 'Menu', menuCode: '1010', roles: ['admin', 'editor'] }
+  },
+  {
+    path: '/system/dict',
+    name: 'dict',
+    component: () => import('@/views/system/dict.vue'),
+    meta: { title: '系统字典', icon: 'Menu', menuCode: '1070', roles: ['admin', 'editor'] }
+  },
+  {
+    path: '/system/menu',
+    name: 'menu',
+    component: () => import('@/views/system/menu.vue'),
+    meta: { title: '菜单管理', icon: 'Menu', menuCode: '1060', roles: ['admin', 'editor'] },
+    redirect: '/system'
+  },
+  {
+    path: '/system/position',
+    name: 'position',
+    component: () => import('@/views/system/position.vue'),
+    meta: { title: '职务管理', icon: 'Menu', menuCode: '1030', roles: ['admin', 'editor'] },
+    redirect: '/system'
+  },
+  {
+    path: '/system/role',
+    name: 'role',
+    component: () => import('@/views/system/role.vue'),
+    meta: { title: '角色管理', icon: 'Menu', menuCode: '1040', roles: ['admin', 'editor'] }
+  },
+  {
+    path: '/system/user',
+    name: 'user',
+    component: () => import('@/views/system/user.vue'),
+    meta: { title: '用户管理', icon: 'Menu', menuCode: '1050', roles: ['admin', 'editor'] }
+  }
+];
 export const constantRoutes: Array<RouteRecordRaw> = [
   {
     path: '/login',
@@ -31,75 +71,22 @@ export const constantRoutes: Array<RouteRecordRaw> = [
         path: '/home',
         component: () => import('@/views/home/index.vue'),
         name: 'Home',
-        meta: { title: '首页', icon: 'HomeFilled', affix: true }
+        meta: { title: '首页', icon: 'HomeFilled', menuCode: '001', affix: true }
       },
-      {
-        path: '/setting',
-        component: () => import('@/views/setting/index.vue'),
-        name: 'Setting',
-        meta: { title: '设置', icon: 'Tools', roles: ['admin'] }
-      },
-      {
-        path: '/menu',
-        name: 'Menu',
-        component: () => import('@/views/menu/index.vue'),
-        meta: { title: '菜单', icon: 'Menu', roles: ['admin', 'editor'] },
-        redirect: '/menu2',
-        children: [
-          {
-            path: '/menu1',
-            name: 'Menu1',
-            component: () => import('@/views/menu/menu10.vue'),
-            meta: { title: '菜单1', roles: ['admin', 'editor'] },
-            redirect: '/menu1-2',
-            children: [
-              {
-                path: '/menu1-1',
-                component: () => import('@/views/menu/menu11.vue'),
-                name: 'Menu1-1',
-                meta: { title: '菜单1-1', roles: ['admin'] }
-              },
-              {
-                path: '/menu1-2',
-                component: () => import('@/views/menu/menu12.vue'),
-                name: 'Menu1-2',
-                meta: { title: '菜单1-2', roles: ['admin', 'editor'] }
-              }
-            ]
-          },
-          {
-            path: '/menu2',
-            component: () => import('@/views/menu/menu2.vue'),
-            name: 'Menu2',
-            meta: { title: '菜单2', roles: ['admin', 'editor'] }
-          }
-        ]
-      },
-      {
-        path: '/star',
-        component: () => import('@/views/star/index.vue'),
-        name: 'Star',
-        meta: { title: '图表', icon: 'Histogram', roles: ['admin', 'editor'] }
-      },
-      {
-        path: '/xueyue',
-        component: () => import('@/views/xueyue/index.vue'),
-        name: 'Xueyue',
-        meta: { title: '雪月', icon: 'Flag', roles: ['admin'] }
-      }
+      ...dynamicRoutes
     ]
   },
   {
     path: '/:pathMatch(.*)*',
     redirect: '/'
   }
-]
+];
 
-export const asyncRoutes = []
+export const asyncRoutes = [];
 
 export const router = createRouter({
   history: createWebHashHistory(),
   routes: constantRoutes
-})
+});
 
-export default router
+export default router;

@@ -3,8 +3,12 @@
     <div class="login-content">
       <div class="login-title">系统登录</div>
       <el-form ref="loginFormRef" class="login-form" :model="loginForm" :rules="loginFormRules">
-        <el-form-item prop="username">
-          <el-input v-model="loginForm.username" clearable placeholder="用户名:superadmin" size="large">
+        <el-form-item prop="FactoryCode">
+          <MySelect size="large" placeholder="请选择单位" :options="factoryoptions" v-model="loginForm.FactoryCode"
+            clearable></MySelect>
+        </el-form-item>
+        <el-form-item prop="userCode">
+          <el-input v-model="loginForm.userCode" clearable placeholder="用户名:superadmin" size="large">
             <template #prepend>
               <I name="UserFilled" size="14" />
             </template>
@@ -30,13 +34,17 @@
 <script lang="ts" setup>
 import { IBaseConfig } from '@/@types/store'
 import { GetFactory } from '@/api/factory'
+import MySelect from '@/components/MySelect/index.vue'
+import store from '@/store'
 import { ElMessage, FormInstance } from 'element-plus'
 import type { CSSProperties, Ref } from 'vue'
-import { computed, inject, reactive, ref } from 'vue'
+import { computed, inject, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-
 const baseConfig = inject<Ref<IBaseConfig>>("baseconfig")
-
+const factoryoptions = ref<{
+  value: any,
+  label: string
+}[]>([])
 const style = computed(() => {
   if (baseConfig?.value && baseConfig.value.loginBgImage) {
     return {
@@ -57,15 +65,33 @@ const passwordType = ref('password')
 
 const loginFormRef = ref<FormInstance>()
 const loginForm = reactive({
-  username: '',
-  password: ''
+  userCode: '',
+  password: '',
+  FactoryCode: "",
 })
 
 const loginFormRules = reactive({
-  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+  FactoryCode: [{ required: true, message: '请选择工厂', trigger: 'change' }],
+  userCode: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
 })
+onMounted(async () => {
+  const res = await GetFactory({
+    pageIndex: 1,
+    pageSize: 50
+  })
 
+  if (res.data && res.data.data) {
+    console.log("res==>", res)
+    factoryoptions.value = res.data.data.map((item: any) => {
+      return {
+        value: item.factoryCode,
+        label: item.factoryName
+      }
+    })
+    console.log("factoryoptions.value===>", factoryoptions.value)
+  }
+})
 const switchPass = () => {
   if (passwordLock.value) {
     passwordType.value = 'text'
@@ -77,22 +103,18 @@ const switchPass = () => {
 
 const submitForm = async () => {
 
-  loginFormRef.value?.validate((valid) => {
+  loginFormRef.value?.validate(async (valid) => {
     if (valid) {
-      GetFactory({
-        pageIndex: 1,
-        pageSize: 50
-      })
-      // btnLoading.value = true
-      // // 访问登录接口
-      // store
-      //   .dispatch('user/login', loginForm)
-      //   .then(() => {
-      //     router.push('/')
-      //   })
-      //   .finally(() => {
-      //     btnLoading.value = false
-      //   })
+      btnLoading.value = true
+      // 访问登录接口
+      store
+        .dispatch('user/login', loginForm)
+        .then(() => {
+          router.push('/')
+        })
+        .finally(() => {
+          btnLoading.value = false
+        })
     } else {
       ElMessage.error('请输入用户名和密码')
     }
