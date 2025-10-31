@@ -13,7 +13,7 @@ service.interceptors.request.use(
     // 如果有token 就携带tokon
     const token = getToken();
     if (token) {
-      config.headers['Authorization'] = 'Bearer__' + token;
+      config.headers['Authorization'] = 'Bearer ' + token;
     }
     return config;
   },

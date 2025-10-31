@@ -29,6 +29,12 @@ interface IMenuItem {
   path: string;
   sort: number;
 }
+declare interface IUserInfo {
+  userCode: string;
+  userName: string;
+  factoryCode: string;
+  factoryName: string;
+}
 declare interface User {
   token: string | undefined;
   roles: string | undefined;
@@ -36,6 +42,8 @@ declare interface User {
   avatar: string | undefined;
   introduction: string;
   menus: IMenuItem[];
+  userInfo: IUserInfo;
+  flatmenus: IMenuItem[];
 }
 
 declare interface State {

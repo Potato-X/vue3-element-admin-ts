@@ -17,65 +17,25 @@
 
 <script lang="ts" setup>
 import { IBaseConfig } from '@/@types/store'
-import { constantRoutes } from '@/router'
 import store from '@/store'
-import { getRoles } from '@/utils/auth'
-import { computed, inject, onMounted, reactive, Ref } from 'vue'
+import { getMenus } from '@/utils/auth'
+import { computed, inject, onMounted, ref, Ref } from 'vue'
 import SidebarItem from './SidebarItem.vue'
 
 const baseConfig = inject<Ref<IBaseConfig>>("baseconfig")
-const roles = getRoles()
-const routerList: any[] = reactive([])
-
+// const roles = getRoles()
+// const flatMenus = getFlatMenus()
+const menus = getMenus()
+const routerList = ref<any[]>([])
 const opened = computed(() => store.state.app.sidebar.opened)
 const isCollapse = computed(() => !opened.value)
 
 onMounted(() => {
-  filterRoutes()
+  routerList.value = menus
+  console.log("routerList====>", routerList.value)
 })
 
-/**
- * 权限过滤路由
- */
-const filterRoutes = () => {
-  constantRoutes.forEach((item) => {
-    if (item.path === '/') {
-      const childrens = item.children as any[]
-      routerList.push(...childrens)
-    }
-  })
-  for (let i = 0; i < routerList.length; i++) {
-    if (
-      routerList[i].meta &&
-      routerList[i].meta.roles &&
-      !routerList[i].meta.roles.includes(roles)
-    ) {
-      routerList.splice(i, 1)
-      i--
-    }
-  }
-  filterChildrens(routerList)
-}
 
-/**
- * 权限过滤子路由
- */
-const filterChildrens = (routers: any) => {
-  const childrens: Array<any> = []
-  routers.forEach((item: any) => {
-    if (
-      (item.meta && !item.meta.roles) ||
-      (item.meta && item.meta.roles && item.meta.roles.includes(roles))
-    ) {
-      childrens.push(item)
-      if (item.children) {
-        filterChildrens(item.children)
-      }
-    }
-  })
-  routers.length = 0
-  routers.push(...childrens)
-}
 </script>
 
 <style lang="scss" scoped="scoped">

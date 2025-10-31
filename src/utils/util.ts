@@ -53,4 +53,49 @@ function mergeObjects<T extends object>(...objs: T[]): T {
     return acc;
   }, {} as T);
 }
-export { DateFormat, getQueryStringByName, mergeObjects, transformData };
+
+//平铺树结构
+function flattenTreeIterative(
+  tree: any[],
+  childrenKey = 'children',
+  callback: (node: any) => void
+) {
+  const result = [];
+  const stack = [...tree];
+
+  while (stack.length) {
+    const node = stack.pop();
+    const { [childrenKey]: children, ...rest } = node;
+    callback && callback(rest);
+    result.push(rest);
+    if (children && children.length > 0) {
+      stack.push(...children);
+    }
+  }
+
+  return result.reverse(); // reverse是为了保持原来的顺序
+}
+
+function traverseTreeDFS(
+  tree: any[],
+  callback: (node: any, parentNode: any) => void,
+  childrenKey = 'children'
+) {
+  function dfs(nodes: any[], parent = null) {
+    for (const node of nodes) {
+      callback(node, parent); // 执行用户回调
+      if (node[childrenKey] && node[childrenKey].length > 0) {
+        dfs(node[childrenKey], node);
+      }
+    }
+  }
+  dfs(tree);
+}
+export {
+  DateFormat,
+  flattenTreeIterative,
+  getQueryStringByName,
+  mergeObjects,
+  transformData,
+  traverseTreeDFS
+};

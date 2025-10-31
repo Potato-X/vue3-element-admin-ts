@@ -1,17 +1,23 @@
-import { IMenuItem, User } from '#/store';
+import { IMenuItem, IUserInfo, User } from '#/store';
 import { get_user_info, user_login, user_logout } from '@/api/user';
+import { dynamicRoutes } from '@/router';
 import {
   getAvatar,
+  getFlatMenus,
   getMenus,
   getName,
   getRoles,
   getToken,
+  getUserInfo,
   setAvatar,
+  setFlatMenus,
   setMenus,
   setName,
   setRoles,
-  setToken
+  setToken,
+  setUserInfo
 } from '@/utils/auth';
+import { flattenTreeIterative, traverseTreeDFS } from '@/utils/util';
 import { ElMessage } from 'element-plus';
 import { Module } from 'vuex';
 
@@ -23,7 +29,9 @@ const userModule: Module<User, any> = {
     name: getName(),
     avatar: getAvatar(),
     menus: getMenus(),
-    introduction: ''
+    introduction: '',
+    userInfo: getUserInfo(),
+    flatmenus: getFlatMenus()
   },
   mutations: {
     SET_TOKEN: (state, token: string) => {
@@ -38,6 +46,10 @@ const userModule: Module<User, any> = {
       state.menus = menus;
       setMenus(menus);
     },
+    SET_FLATMENUS(state, flatmenus: IMenuItem[]) {
+      state.flatmenus = flatmenus;
+      setFlatMenus(flatmenus);
+    },
     SET_NAME: (state, name: string) => {
       state.name = name;
       setName(name);
@@ -48,6 +60,10 @@ const userModule: Module<User, any> = {
     },
     SET_INTRODUCTION: (state, introduction: string) => {
       state.introduction = introduction;
+    },
+    SET_USERINFO: (state, userInfo: IUserInfo) => {
+      state.userInfo = userInfo;
+      setUserInfo(userInfo);
     }
   },
   actions: {
@@ -62,9 +78,33 @@ const userModule: Module<User, any> = {
               const permissions = res.permissions;
               const roles = permissions.roles;
               const menus = permissions.menus;
+              traverseTreeDFS(menus, (node) => {
+                if (node.parentId) {
+                  const target = dynamicRoutes.find((item) => item.meta?.menuCode == node.menuCode);
+                  if (target) {
+                    node.path = target.path;
+                    node.meta = target.meta;
+                  }
+                } else {
+                  node.meta = {
+                    path: node.path,
+                    title: node.menuName,
+                    icon: 'Menu',
+                    menuCode: node.menuCode
+                  };
+                }
+              });
+              const flatMenus = flattenTreeIterative(menus, 'children', (node) => {
+                const target = dynamicRoutes.find((item) => item.meta?.menuCode == node.menuCode);
+                if (target) {
+                  node.path = target.path;
+                }
+              });
+              commit('SET_USERINFO', userInfo);
               commit('SET_TOKEN', res.accessToken);
               commit('SET_ROLES', roles);
               commit('SET_MENUS', menus);
+              commit('SET_FLATMENUS', flatMenus);
               commit('SET_NAME', userInfo.userName);
               commit('SET_AVATAR', '');
               commit('SET_INTRODUCTION', userInfo.userName);
