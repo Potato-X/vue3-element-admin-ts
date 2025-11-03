@@ -1,4 +1,4 @@
-import request from './Axios';
+import {request} from './Axios';
 
 const baseURL = import.meta.env.VITE_BASE_API;
 /**
@@ -6,8 +6,8 @@ const baseURL = import.meta.env.VITE_BASE_API;
  * @param {*} param
  * @returns
  */
-export function GetMenuTree(params?: any) {
-  return request({
+export function GetMenuTree<T>(params?: any) {
+  return request<T>({
     url: `${baseURL}/BaseMenu/GetMenuTree`,
     method: 'post',
     params
@@ -24,5 +24,18 @@ export function AddMenuWithButtons(data?: any) {
     url: `${baseURL}/BaseMenu/AddMenuWithButtons`,
     method: 'post',
     data
+  });
+}
+
+/**
+ * 批量删除菜单
+ * @param {*} param
+ * @returns
+ */
+export function DeleteMenu(params?: any) {
+  return request({
+    url: `${baseURL}/BaseMenu/DeleteMenu`,
+    method: 'delete',
+    params
   });
 }

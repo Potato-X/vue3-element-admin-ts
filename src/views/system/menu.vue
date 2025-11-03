@@ -1,7 +1,10 @@
 <template>
-    <div class="">
-        <el-button type="primary" @click="addMenuHandler()">新增菜单</el-button>
-        <el-table v-loading="loading" :data="tableData" style="width: 100%; margin: 8px 0 10px 0" row-key="id" border
+    <div class="page">
+        <div>
+            <el-button :icon="RefreshRight" @click="refresh()"></el-button>
+            <el-button type="primary" @click="addMenuHandler()">新增菜单</el-button>
+        </div>
+        <el-table class="auto-height" :data="tableData" style="width: 100%; margin: 8px 0 10px 0" row-key="id" border
             default-expand-all>
             <el-table-column header-align="center" prop="menuName" label="菜单名称" />
             <el-table-column align="center" prop="isEnabled" label="是否启用" width="100px">
@@ -13,12 +16,6 @@
             <el-table-column header-align="center" prop="path" label="菜单路径" />
             <el-table-column align="center" label="操作" width="120px">
                 <template #default="scope">
-                    <!-- <el-button type="primary" link @click="addHandler(scope.row, true)">
-                        新增菜单
-                    </el-button>
-                    <el-button type="primary" link @click="addHandler(scope.row)">
-                        新增子菜单
-                    </el-button> -->
                     <el-button type="primary" link @click="editHandler(scope.row)">
                         编辑
                     </el-button>
@@ -29,7 +26,7 @@
             </el-table-column>
         </el-table>
     </div>
-    <el-drawer v-model="open" direction="rtl" size="520px">
+    <el-drawer v-model="open" direction="rtl" size="520px" :close-on-click-modal="false">
         <template #header>
             <h4>{{ menuaction.isedit ? `编辑菜单` : "新增菜单" }}</h4>
         </template>
@@ -102,43 +99,23 @@
 </template>
 
 <script setup lang="ts">
-import { AddMenuWithButtons, GetMenuTree } from '@/api/menu'
+import { AddMenuWithButtons, DeleteMenu, GetMenuTree, } from '@/api/menu'
 import MySelect from '@/components/MySelect/index.vue'
 import store from '@/store'
 import { filterTreeByLevel } from '@/utils/util'
-import { CirclePlus, Delete } from '@element-plus/icons-vue'
-import { ElSwitch, FormInstance, FormRules } from 'element-plus/es'
+import { CirclePlus, Delete, RefreshRight } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox, ElSwitch, FormInstance, FormRules } from 'element-plus/es'
 import { computed, onMounted, reactive, ref } from 'vue'
 
-type typeOfUseType = "pc" | "app"
-interface IMenuItem {
-    "factoryCode": string,
-    "menuCode": string,
-    "menuName": string,
-    "path": string,
-    "icon": string,
-    "typeOfUse": typeOfUseType,
-    "sort": number,
-    "parentId": string,
-    "isEnabled": number,
-    "buttons": {
-        "btnCode": string,
-        "btnName": string
-    }[],
-    "children": IMenuItem[],
-    "id": string,
-    "createCode": string,
-    "createTime": string,
-    "updateCode": string,
-    "updateTime": string
-}
+type typeOfUseType = "PC" | "APP"
+
 interface IMenuForm {
     "id"?: number,
     "menuCode": string,
     "menuName": string,
     "path": string,
     "icon"?: string,
-    "typeOfUse"?: typeOfUseType,
+    "typeOfUse": typeOfUseType,
     "sort"?: number,
     "parentId"?: string,
     "isEnabled": number,
@@ -146,15 +123,24 @@ interface IMenuForm {
     "buttons": {
         "btnCode": string,
         "btnName": string
-    }[]
+    }[],
+    [key:string]:any
+}
+interface IMenuItem extends IMenuForm {
+    "factoryCode": string,
+    "children": IMenuItem[],
+    "createCode": string,
+    "createTime": string,
+    "updateCode": string,
+    "updateTime": string
 }
 const loading = ref(false)
 const tableData = ref<IMenuItem[]>([])
 
 const formRef = ref<FormInstance>()
 const typeOfUseList = reactive<{ value: string, label: string }[]>([
-    { value: "app", label: "app" },
-    { value: "pc", label: "pc" }
+    { value: "APP", label: "APP" },
+    { value: "PC", label: "PC" }
 ])
 const open = ref(false)
 const menuaction = reactive<{ isedit: boolean, actionrow: IMenuItem | null, sub: boolean }>({
@@ -201,7 +187,9 @@ const form = ref<IMenuForm>({
     buttons: [
         { btnCode: "", btnName: "" }
     ],
-    isTop: false
+    isTop: false,
+    parentId: "",
+    typeOfUse: "PC"
 })
 
 const treeData = computed(() => {
@@ -212,19 +200,41 @@ const flatMenus = computed(() => store.state.user.flatmenus)
 
 const addMenuHandler = () => {
     open.value = true
-}
-const addHandler = (row: IMenuItem, sub?: boolean) => {
-    open.value = true
     menuaction.isedit = false
-    menuaction.actionrow = row
-    menuaction.sub = !!sub
+    menuaction.actionrow = null
 }
+
 const editHandler = (row: IMenuItem) => {
     open.value = true
     menuaction.isedit = true
     menuaction.actionrow = row
+    for (const key in form.value) {
+        console.log(key)
+        if (!Object.hasOwn(form.value, key)) continue;
+        form.value[key] = menuaction.actionrow[key as keyof typeof form.value];
+    }
+    form.value.isTop = !row.parentId;
 }
-const deleteHandler = (row: IMenuItem) => { }
+const deleteHandler = (row: IMenuItem) => {
+    let content = `确定要删除“${row.menuName}”菜单？该操作不可恢复`
+    if (row.children && row.children.length) {
+        content = `确定要删除“${row.menuName}”菜单？此操作会导致当前菜单及其子菜单一并删除并且该操作不可恢复`
+    }
+    ElMessageBox.confirm(content, "警告", {
+        type: "warning",
+        confirmButtonText: "确定",
+        cancelButtonText: "取消"
+    }).then(async () => {
+        const res = await DeleteMenu({
+            Id: row.id
+        })
+        if (res.success) {
+            return ElMessage.success(res.message)
+        }
+        return ElMessage.error(res.message)
+    })
+
+}
 const cancelClick = () => {
     if (formRef.value) {
         formRef.value?.resetFields()
@@ -256,26 +266,43 @@ const confirmClick = () => {
 
                 console.log("requestBody==>", requestBody)
                 const res = await AddMenuWithButtons(requestBody)
+                if (res.data) {
+                    ElMessage.success(res.message)
+                    refresh()
+                }
                 console.log("res====>", res)
-                // cancelClick()
+                cancelClick()
             }
         })
     }
 
 }
-onMounted(async () => {
+const refresh = async () => {
     loading.value = true
-    const res = await GetMenuTree({
+    const res = await GetMenuTree<Partial<IMenuItem[]>>({
         FactoryCode: factoryCode.value
     })
     if (res.data) {
-        tableData.value = res.data
+        tableData.value = res.data as IMenuItem[]
     }
     loading.value = false
+}
+onMounted(() => {
+    refresh()
 })
 </script>
 
 <style scoped lang="scss">
+.page {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    .auto-height {
+        flex: 1;
+    }
+}
+
 .form-buttions {
     &::v-deep(.el-form-item__label) {
         font-weight: 700;

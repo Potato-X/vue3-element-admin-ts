@@ -1,30 +1,36 @@
-import { createApp, createVNode } from 'vue'
+import { createApp, createVNode } from 'vue';
 
 // element-plus
-import ElementPlus, { ElIcon } from 'element-plus'
-import 'element-plus/dist/index.css'
-import * as Icons from '@element-plus/icons-vue'
+import ElementPlus, { ElIcon } from 'element-plus';
+import 'element-plus/dist/index.css';
+import * as Icons from '@element-plus/icons-vue';
 
 // global css
-import './styles/index.scss'
+import './styles/index.scss';
 
-import App from './App.vue'
-import router from './router'
-import store from './store'
-import Directives from './directive'
-
+import App from './App.vue';
+import router from './router';
+import store from './store';
+import Directives from './directive';
+import zhCn from 'element-plus/es/locale/lang/zh-cn';
 // permission control
-import './permission'
+import './permission';
 
 // utils
-import { DateFormat } from './utils/util'
+import { DateFormat } from './utils/util';
 
-const app = createApp(App)
+const app = createApp(App);
 
-app.use(ElementPlus).use(Directives).use(router).use(store).provide('$DateFormat', DateFormat).mount('#app')
+app
+  .use(ElementPlus, { locale: zhCn })
+  .use(Directives)
+  .use(router)
+  .use(store)
+  .provide('$DateFormat', DateFormat)
+  .mount('#app');
 
 const Icon = (props: { name: string; size: number | string; color: string }) => {
-  const { name, size, color } = props
+  const { name, size, color } = props;
   return createVNode(
     ElIcon,
     {
@@ -32,9 +38,9 @@ const Icon = (props: { name: string; size: number | string; color: string }) => 
       color
     },
     () => createVNode(Icons[name as keyof typeof Icons])
-  )
-}
+  );
+};
 
-app.component('I', Icon)
+app.component('I', Icon);
 
-export default app
+export default app;
