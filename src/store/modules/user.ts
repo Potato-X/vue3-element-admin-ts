@@ -1,6 +1,6 @@
 import { IMenuItem, IUserInfo, User } from '#/store';
 import { get_user_info, user_login, user_logout } from '@/api/user';
-import { dynamicRoutes } from '@/router';
+import router, { dynamicRoutes } from '@/router';
 import {
   getAvatar,
   getFlatMenus,
@@ -84,6 +84,14 @@ const userModule: Module<User, any> = {
                   if (target) {
                     node.path = target.path;
                     node.meta = target.meta;
+                  }
+                  if (!node.meta) {
+                    node.meta = {
+                      path: node.path,
+                      title: node.menuName,
+                      icon: 'Menu',
+                      menuCode: node.menuCode
+                    };
                   }
                 } else {
                   node.meta = {

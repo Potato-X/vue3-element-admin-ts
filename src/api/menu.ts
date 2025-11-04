@@ -32,10 +32,10 @@ export function AddMenuWithButtons(data?: any) {
  * @param {*} param
  * @returns
  */
-export function DeleteMenu(params?: any) {
+export function DeleteMenu(data?: any) {
   return request({
     url: `${baseURL}/BaseMenu/DeleteMenu`,
     method: 'delete',
-    params
+    data
   });
 }

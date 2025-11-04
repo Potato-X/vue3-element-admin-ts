@@ -5,14 +5,14 @@
       :class="{ 'sub-menu-title-noDropdown': !nav.isNest }">
       <I v-if="nav.meta.icon" :name="nav.meta.icon" size="18" class="sidebar-icon" />
       <template #title>
-        <span>{{ nav.meta.title }}</span>
+        <span>{{ nav.menuName }}</span>
       </template>
     </el-menu-item>
     <el-sub-menu v-else :index="nav.path">
       <!-- 二级菜单 -->
       <template #title>
         <I v-if="nav.meta.icon" :name="nav.meta.icon" size="18" class="sidebar-icon" />
-        <span>{{ nav.meta.title }}</span>
+        <span>{{ nav.menuName }}</span>
       </template>
       <!-- 三级菜单 -->
       <div v-for="child in nav.children" :key="child.path">
@@ -20,7 +20,7 @@
           :is-nest="true" :nav="child" class="nest-menu" />
         <el-menu-item v-else :index="child.path">
           <template #title>
-            <span>{{ child.meta.title }}</span>
+            <span>{{ child.menuName }}</span>
           </template>
         </el-menu-item>
       </div>

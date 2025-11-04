@@ -92,19 +92,32 @@ function traverseTreeDFS(
   dfs(tree);
 }
 
-function filterTreeByLevel(tree: any[], maxLevel: number, childrenKey = 'children') {
+function filterTreeByLevel(
+  tree: any[],
+  maxLevel: number,
+  callback: (node: any) => boolean,
+  childrenKey = 'children'
+) {
   function traverse(nodes: any[], level: number) {
     if (!Array.isArray(nodes)) return [];
 
-    return nodes.map((node) => {
-      const newNode = { ...node };
-      if (level < maxLevel && Array.isArray(node[childrenKey])) {
-        newNode[childrenKey] = traverse(node[childrenKey], level + 1);
-      } else {
-        delete newNode[childrenKey]; // 超出层级就删除 children
-      }
-      return newNode;
-    });
+    return nodes
+      .filter((node) => {
+        if (callback) {
+          return !callback(node);
+        } else {
+          return true;
+        }
+      })
+      .map((node) => {
+        const newNode = { ...node };
+        if (level < maxLevel && Array.isArray(node[childrenKey])) {
+          newNode[childrenKey] = traverse(node[childrenKey], level + 1);
+        } else {
+          delete newNode[childrenKey]; // 超出层级就删除 children
+        }
+        return newNode;
+      });
   }
 
   return traverse(tree, 1);
